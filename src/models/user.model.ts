@@ -25,7 +25,7 @@ const UserModel : ModelDefined<IUserDocument, UserCreationAttributes> & UserMode
             type : DataTypes.STRING,
             allowNull : true
         },
-        facebookId : {
+        githubId : {
             type : DataTypes.STRING,
             allowNull : true
         },

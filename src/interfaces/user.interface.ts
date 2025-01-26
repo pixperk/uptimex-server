@@ -19,7 +19,7 @@ export interface IUserDocument {
     id?: number;
     username? : string;
     googleId? : string;
-    facebookId? : string;
+    githubId? : string;
     email? : string;
     socialId? : string;
     type? : string;

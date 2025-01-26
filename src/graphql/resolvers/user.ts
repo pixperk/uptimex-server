@@ -122,8 +122,8 @@ export const UserResolver = {
         const authData: IUserDocument = {
           username: upperFirst(username),
           email: toLower(email),
-          ...(type === "facebook" ? {
-            facebookId: socialId,
+          ...(type === "github" ? {
+            githubId: socialId,
           } : {}),
           ...(type === "google" ? {
             googleId: socialId,

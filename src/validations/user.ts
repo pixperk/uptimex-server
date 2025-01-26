@@ -25,7 +25,7 @@ const password = string()
   .min(5, 'Password should have at least 5 characters.')
   .max(10, 'Password should have at most 10 characters.');
 const googleId = string().optional();
-const facebookId = string().optional();
+const githubId = string().optional();
 
 // User Registeration Validation Schema
 export const UserRegisterationRules = object().shape({
@@ -33,7 +33,7 @@ export const UserRegisterationRules = object().shape({
   password,
   email,
   googleId,
-  facebookId
+  githubId
 });
 
 // User Authentication Validation Schema
@@ -41,5 +41,5 @@ export const UserLoginRules = object().shape({
   usernameOrEmail: loginUsername,
   password,
   googleId,
-  facebookId
+  githubId
 });

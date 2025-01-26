@@ -15,7 +15,7 @@ export const userSchema = buildSchema(`#graphql
        email : String
        createdAt : String
        googleId : String
-       facebookId : String
+       githubId : String
     }
 
     type NotificationResult{

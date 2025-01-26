@@ -48,8 +48,8 @@ export async function getUserBySocialId(
       where: {
         [Op.or]: [
           {
-            ...(type === "facebook" ? {
-              facebookId: socialId,
+            ...(type === "github" ? {
+              githubId: socialId,
             } : {}),
             ...(type === "google" ? {
               googleId: socialId,
