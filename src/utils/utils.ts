@@ -168,7 +168,7 @@ export const emailSender = async (notificationEmails : string, template : string
 export const locals = () : IEmailLocals => {
   return {
     appLink : `${CLIENT_URL}`,
-    appIcon : 'https://ibb.com/jD45fqX',
+    appIcon : '/placeholder.svg',
     appName : ''
   }
 }
