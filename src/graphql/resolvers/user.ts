@@ -107,7 +107,7 @@ export const UserResolver = {
       const { user } = args;
       await UserRegisterationRules.validate(user, { abortEarly: false });
       const { username, email, socialId, type } = user;
-      console.log({ username, email, socialId, type });
+      
       
       const checkIfUserExists: IUserDocument | undefined =
         await getUserBySocialId(socialId!, email!, type!);

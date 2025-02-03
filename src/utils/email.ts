@@ -1,57 +1,58 @@
 import { IEmailLocals } from "@app/interfaces/notification.interface";
 import { SENDER_EMAIL, SENDER_EMAIL_PASSWORD } from "@app/server/config";
 import logger from "@app/server/logger";
-import nodemailer from 'nodemailer'
-import Email from 'email-templates'
+import nodemailer from "nodemailer";
+import ejs from "ejs";
+import fs from "fs";
 import path from "path";
 
-export async function sendEmail(template : string, receiver : string, locals : IEmailLocals){
+export async function sendEmail(template: string, receiver: string, locals: IEmailLocals) {
     try {
-        await emailTemplates(template, receiver, locals);
-        logger.info('Email sent successfully');
+        // Read and compile the EJS template
+        const templatePath = path.join(__dirname, "..", "emails", `${template}.ejs`);
+        const emailHtml = await compileTemplate(templatePath, locals);
+
+        if (!emailHtml) {
+            logger.error(`Failed to compile email template: ${template}`);
+            return;
+        }
+
+        await sendMail(receiver, `${template === 'errorStatus' ? "Your Site is Down" : "Your Site is Now Back Up"}`, emailHtml);
+        logger.info(`Email successfully sent to ${receiver}`);
     } catch (error) {
-        logger.error(`Email notification error : ${error}`);
+        logger.error(`Email notification error: ${error}`);
     }
 }
 
-async function emailTemplates(template:string, receiver: string, locals : IEmailLocals) : Promise<void>{
+async function compileTemplate(templatePath: string, locals: IEmailLocals): Promise<string | null> {
+    try {
+        const templateContent = fs.readFileSync(templatePath, "utf-8");
+        return ejs.render(templateContent, locals);
+    } catch (error) {
+        logger.error(`Error rendering email template: ${error}`);
+        return null;
+    }
+}
+
+async function sendMail(receiver: string, subject: string, html: string) {
     try {
         const transporter = nodemailer.createTransport({
-            host: 'smtp.ethereal.email',
-            port: 587,
+            service: "gmail",
             auth: {
                 user: SENDER_EMAIL,
-                pass: SENDER_EMAIL_PASSWORD
-            }
+                pass: SENDER_EMAIL_PASSWORD,
+            },
         });
 
-        const email : Email = new Email({
-            message : {
-                from : `UptimeX <${SENDER_EMAIL}>`
-            },
-            send : true,
-            preview : false,
-            transport : transporter,
-            views : {
-                options : {
-                    extension : 'ejs'
-                }
-            },
-            juice : true,
-            juiceResources : {
-                preserveImportant : true,
-                webResources : {
-                    relativeTo : path.join(__dirname, '../../build')
-                }
-            }
+        await transporter.sendMail({
+            from: `UptimeX <${SENDER_EMAIL}>`,
+            to: receiver,
+            subject,
+            html, // Send compiled HTML template
+        });
 
-        })
-        await email.send({
-            template : path.join(__dirname, '..', '/emails', template),
-            message : {to : receiver},
-            locals
-        })
+        logger.info(`Email successfully sent to ${receiver}`);
     } catch (error) {
-        logger.error(error)
+        logger.error("Email send error:", error);
     }
 }

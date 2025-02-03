@@ -1,11 +1,10 @@
 import { ISSLMonitorDocument } from "@app/interfaces/ssl.interface";
-import { MonitorModel } from "@app/models/monitor.model";
 import { SSLModel } from "@app/models/ssl.model";
-import { Model, Op } from "sequelize";
-import { getSingleNotificationGroup } from "./notification.service";
+import { sslMonitor } from "@app/monitors/ssl.monitor";
 import { startSingleJob } from "@app/utils/jobs";
 import { appTimeZone } from "@app/utils/utils";
-import { sslMonitor } from "@app/monitors/ssl.monitor";
+import { Model, Op } from "sequelize";
+import { getSingleNotificationGroup } from "./notification.service";
 
 /**
  * Creates a new SSL monitor entry in the database.
@@ -191,7 +190,7 @@ export const deleteSingleSSLMonitor = async (
   userId: number
 ): Promise<ISSLMonitorDocument[]> => {
   try {
-    await MonitorModel.destroy({
+    await SSLModel.destroy({
       where: {
         id: monitorId,
       },

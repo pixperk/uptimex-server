@@ -145,9 +145,6 @@ export const UptimeMonitorResolver = {
         stopSingleBackgroundJob(name, monitorId);
       } else {
         resumeMonitors(monitorId!);
-        startSingleJob(name, appTimeZone, 10, () =>
-          console.log("Resumes every 10 secs")
-        );
       }
       return {
         monitors: results,

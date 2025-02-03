@@ -1,25 +1,24 @@
 import {
-    AppContext
+  AppContext
 } from "@app/interfaces/monitor.interface";
 import {
-    ISSLMonitorArgs,
-    ISSLMonitorDocument,
+  ISSLMonitorArgs,
+  ISSLMonitorDocument,
 } from "@app/interfaces/ssl.interface";
 import { getSingleNotificationGroup } from "@app/services/notification.service";
 import {
-    createSSLMonitor,
-    deleteSingleSSLMonitor,
-    getSSLMonitorById,
-    getUserSSLMonitors,
-    sslStatusMonitor,
-    toggleSSLMonitor,
-    updateSingleSSLMonitor,
+  createSSLMonitor,
+  deleteSingleSSLMonitor,
+  getSSLMonitorById,
+  getUserSSLMonitors,
+  sslStatusMonitor,
+  toggleSSLMonitor,
+  updateSingleSSLMonitor,
 } from "@app/services/ssl.service";
-import { startSingleJob, stopSingleBackgroundJob } from "@app/utils/jobs";
+import { stopSingleBackgroundJob } from "@app/utils/jobs";
 import {
-    appTimeZone,
-    authenticatedGraphQLRoute,
-    resumeSSLMonitors,
+  authenticatedGraphQLRoute,
+  resumeSSLMonitors
 } from "@app/utils/utils";
 import { PubSub } from "graphql-subscriptions";
 import { toLower } from "lodash";
@@ -92,9 +91,6 @@ export const SSLMonitorResolver = {
         stopSingleBackgroundJob(name, monitorId);
       } else {
         resumeSSLMonitors(monitorId!);
-        startSingleJob(name, appTimeZone, 10, () =>
-          console.log("Resumes every 10 secs")
-        );
       }
       return {
         sslMonitors: results,
