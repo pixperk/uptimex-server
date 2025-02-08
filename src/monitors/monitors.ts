@@ -187,9 +187,12 @@ export const tcpPing = async (
 
 export const getCertificateInfo = async (url: string): Promise<ISSLInfo> => {
   return new Promise((resolve, reject) => {
-    if (!url.startsWith("https://")) {
-      reject(new Error(`Host ${url} is invalid`));
-    } else {
+    try {
+      if (!url.startsWith("https://")) {
+        reject(new Error(`Host ${url} is invalid`));
+        return;
+      }
+
       const list: string[] = url.split("//");
       const host: string = list[1];
       const options: Partial<RequestOptions> = {
@@ -201,68 +204,74 @@ export const getCertificateInfo = async (url: string): Promise<ISSLInfo> => {
         port: 443,
         path: "/",
       };
+
       const req: ClientRequest = request(
         {
           host,
           ...options,
         },
         (res: IncomingMessage) => {
-          const authorized: boolean = (res.socket as TLSSocket).authorized;
-          const authorizionError: Error = (res.socket as TLSSocket).authorizationError;
-          const cert: PeerCertificate = (
-            res.socket as TLSSocket
-          ).getPeerCertificate();
-          const validFor: string[] | undefined = cert.subjectaltname
-            ?.replace(/DNS:|IP Address:/g, "")
-            .split(", ");
-          const validTo: Date = new Date(cert.valid_to);
-          const daysRemaining: number = getDaysRemainining(new Date(), validTo);
-          const parsed: ISSLInfo = {
-            host,
-            type: authorized ? "success" : "error",
-            reason: authorizionError,
-            validFor: validFor!,
-            subject: {
-              org: cert.subject.O,
-              common_name: cert.subject.CN,
-              sans: cert.subjectaltname,
-            },
-            issuer: {
-              org: cert.issuer.O,
-              common_name: cert.issuer.CN,
-              country: cert.issuer.C,
-            },
-            info: {
-              validFrom: cert.valid_from,
-              validTo: cert.valid_to,
-              daysLeft: `${daysRemaining}`,
-              backgroundClass: "",
-            },
-          };
+          try {
+            const authorized: boolean = (res.socket as TLSSocket).authorized;
+            const authorizationError: Error = (res.socket as TLSSocket).authorizationError;
+            const cert: PeerCertificate = (res.socket as TLSSocket).getPeerCertificate();
+            const validFor: string[] | undefined = cert.subjectaltname
+              ?.replace(/DNS:|IP Address:/g, "")
+              .split(", ");
+            const validTo: Date = new Date(cert.valid_to);
+            const daysRemaining: number = getDaysRemainining(new Date(), validTo);
 
-          if (authorized) {
-            if (daysRemaining <= 30) {
-              parsed.type = "danger";
-              parsed.info.backgroundClass = "danger";
-            } else if (daysRemaining > 30 && daysRemaining <= 59) {
-              parsed.type = "expiring soon";
-              parsed.info.backgroundClass = "warning";
+            const parsed: ISSLInfo = {
+              host,
+              type: authorized ? "success" : "error",
+              reason: authorizationError,
+              validFor: validFor!,
+              subject: {
+                org: cert.subject.O,
+                common_name: cert.subject.CN,
+                sans: cert.subjectaltname,
+              },
+              issuer: {
+                org: cert.issuer.O,
+                common_name: cert.issuer.CN,
+                country: cert.issuer.C,
+              },
+              info: {
+                validFrom: cert.valid_from,
+                validTo: cert.valid_to,
+                daysLeft: `${daysRemaining}`,
+                backgroundClass: "",
+              },
+            };
+
+            if (authorized) {
+              if (daysRemaining <= 30) {
+                parsed.type = "danger";
+                parsed.info.backgroundClass = "danger";
+              } else if (daysRemaining > 30 && daysRemaining <= 59) {
+                parsed.type = "expiring soon";
+                parsed.info.backgroundClass = "warning";
+              } else {
+                parsed.info.backgroundClass = "success";
+              }
             } else {
-              parsed.info.backgroundClass = "success";
+              parsed.info.backgroundClass = "danger";
             }
-          } else {
-            parsed.info.backgroundClass = "danger";
-          }
 
-          if(authorized){
-            resolve(parsed);
-          }else{
-            reject(parsed)
+            if (authorized) {
+              resolve(parsed);
+            } else {
+              reject(parsed);
+            }
+          } catch (error) {
+            reject(new Error(`Error processing response: ${error.message}`));
           }
-
-         
         }
       );
+
+      req.on("error", (err) => {
+        reject(new Error(`Socket error: ${err.message}`));
+      });
 
       req.on("timeout", () => {
         req.destroy();
@@ -270,8 +279,10 @@ export const getCertificateInfo = async (url: string): Promise<ISSLInfo> => {
       });
 
       req.setTimeout(5000);
-
       req.end();
+    } catch (error) {
+      reject(new Error(`Unexpected error: ${error.message}`));
     }
   });
 };
+
