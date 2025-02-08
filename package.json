@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "start": "node start ./build/src/index.js | pino-pretty -c",
+    "start": "node ./build/src/index.js | pino-pretty -c",
     "dev": "nodemon -r tsconfig-paths/register src/index.ts | pino-pretty -c",
     "build": "tsc --project tsconfig.json && tsc-alias -p tsconfig.json && ts-node tools/copyAssets.ts"
   },
