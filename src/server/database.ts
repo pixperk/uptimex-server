@@ -4,8 +4,15 @@ import logger from "./logger";
 
 export const sequelize : Sequelize = new Sequelize(POSTGRES_DB,{
     dialect : 'postgres',
-    logging : false,
-})
+    dialectOptions: {
+        ssl: {
+          require: true,
+          rejectUnauthorized: false,
+        },
+  
+},
+        logging : false
+    });
 
 export async function databaseConnection() : Promise<void> {
     try {
