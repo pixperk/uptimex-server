@@ -4,13 +4,6 @@ import logger from "./logger";
 
 export const sequelize : Sequelize = new Sequelize(POSTGRES_DB,{
     dialect : 'postgres',
-    dialectOptions: {
-        ssl: {
-          require: true,
-          rejectUnauthorized: false,
-        },
-  
-},
         logging : false
     });
 
