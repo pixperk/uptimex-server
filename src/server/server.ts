@@ -107,7 +107,7 @@ export default class MonitorServer {
         keys: [SECRET_KEY_ONE, SECRET_KEY_TWO],
         maxAge: 24 * 7 * 3600000,
         secure: NODE_ENV === "production",
-        ...(NODE_ENV === "production" && { sameSite: "none" }),
+        sameSite: NODE_ENV === "production" ? "none" : "lax"
       })
     );
     this.graphqlRoute(app);
